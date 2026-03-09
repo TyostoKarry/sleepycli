@@ -35,7 +35,6 @@ func (c *Config) Validate() error {
 	return validateCycles(c.MinCycles, c.MaxCycles)
 }
 
-// validateModes ensures the user hasn't mixed incompatible flag groups.
 func validateModes(wake, sleep, from, to string) error {
 	windowSet := from != "" || to != ""
 	wakeSleepSet := wake != "" || sleep != ""
@@ -82,7 +81,7 @@ func validateTimeFlags(wake, sleep string) error {
 }
 
 func validateTimeFormat(s string) error {
-	_, err := time.Parse("15:04", normalizeHour(s))
+	_, err := time.Parse("15:04", NormalizeHour(s))
 	return err
 }
 
@@ -103,7 +102,7 @@ func validateCycles(min, max int) error {
 	return nil
 }
 
-func normalizeHour(s string) string {
+func NormalizeHour(s string) string {
 	parts := strings.SplitN(s, ":", 2)
 	if len(parts) == 2 && len(parts[0]) == 1 {
 		return "0" + s
