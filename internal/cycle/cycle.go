@@ -29,3 +29,20 @@ func CalculateWakeTimes(sleepTime time.Time, buffer time.Duration, minCycles int
 	}
 	return wakeTimes
 }
+
+// CalculateCyclesInWindow returns the number of complete sleep cycles that
+// fit between a sleep time and a wake time, accounting for the buffer,
+// and the remaining duration after those complete cycles.
+// If to is not after from, 24 hours are added to to (next-day wake).
+func CalculateCyclesInWindow(from time.Time, to time.Time, buffer time.Duration) (int, time.Duration) {
+	if !to.After(from) {
+		to = to.Add(24 * time.Hour)
+	}
+	totalDuration := to.Sub(from) - buffer
+	if totalDuration < 0 {
+		return 0, 0
+	}
+	cycles := int(totalDuration / CycleDuration)
+	overflow := totalDuration % CycleDuration
+	return cycles, overflow
+}

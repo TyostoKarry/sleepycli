@@ -254,3 +254,171 @@ func TestCalculateWakeTimes_tenCycles(t *testing.T) {
 		}
 	}
 }
+
+func TestCalculateCyclesInWindow(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 8, 7, 0, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 0)
+
+	if cycles != 6 {
+		t.Errorf("expected 6 cycles, got %d", cycles)
+	}
+	if overflow != 0 {
+		t.Errorf("expected 0 overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_withBuffer(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 8, 7, 15, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 15*time.Minute)
+
+	if cycles != 6 {
+		t.Errorf("expected 6 cycles, got %d", cycles)
+	}
+	if overflow != 0 {
+		t.Errorf("expected 0 overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_nextDayWake(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 23, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 7, 7, 0, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 0)
+
+	if cycles != 5 {
+		t.Errorf("expected 5 cycles, got %d", cycles)
+	}
+	if overflow != 30*time.Minute {
+		t.Errorf("expected 30m overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_withOverflow(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 8, 7, 44, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 0)
+
+	if cycles != 6 {
+		t.Errorf("expected 6 cycles, got %d", cycles)
+	}
+	if overflow != 44*time.Minute {
+		t.Errorf("expected 44m overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_bufferLargerThanWindow(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 7, 22, 10, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 15*time.Minute)
+
+	if cycles != 0 {
+		t.Errorf("expected 0 cycles, got %d", cycles)
+	}
+	if overflow != 0 {
+		t.Errorf("expected 0 overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_overflowOnlyNoCycles(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 7, 22, 45, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 0)
+
+	if cycles != 0 {
+		t.Errorf("expected 0 cycles, got %d", cycles)
+	}
+	if overflow != 45*time.Minute {
+		t.Errorf("expected 45m overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_exactlyOneCycle(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 7, 23, 30, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 0)
+
+	if cycles != 1 {
+		t.Errorf("expected 1 cycle, got %d", cycles)
+	}
+	if overflow != 0 {
+		t.Errorf("expected 0 overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_exactlyOneCycleWithBuffer(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 7, 23, 45, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 15*time.Minute)
+
+	if cycles != 1 {
+		t.Errorf("expected 1 cycle, got %d", cycles)
+	}
+	if overflow != 0 {
+		t.Errorf("expected 0 overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_zeroBuffer(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 8, 5, 30, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 0)
+
+	if cycles != 5 {
+		t.Errorf("expected 5 cycles, got %d", cycles)
+	}
+	if overflow != 0 {
+		t.Errorf("expected 0 overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_largeBuffer(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 8, 9, 0, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 120*time.Minute)
+
+	if cycles != 6 {
+		t.Errorf("expected 6 cycles, got %d", cycles)
+	}
+	if overflow != 0 {
+		t.Errorf("expected 0 overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_midnightBoundary(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 23, 30, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 8, 0, 0, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 0)
+
+	if cycles != 0 {
+		t.Errorf("expected 0 cycles, got %d", cycles)
+	}
+	if overflow != 30*time.Minute {
+		t.Errorf("expected 30m overflow, got %v", overflow)
+	}
+}
+
+func TestCalculateCyclesInWindow_sameFromAndTo(t *testing.T) {
+	from := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+	to := time.Date(2026, time.March, 7, 22, 0, 0, 0, time.UTC)
+
+	cycles, overflow := CalculateCyclesInWindow(from, to, 0)
+
+	if cycles != 16 {
+		t.Errorf("expected 16 cycles, got %d", cycles)
+	}
+	if overflow != 0 {
+		t.Errorf("expected 0 overflow, got %v", overflow)
+	}
+}
