@@ -49,9 +49,11 @@ func runNowMode(buffer time.Duration, minCycles, maxCycles int) error {
 	wakeTimes := cycle.CalculateWakeTimes(now, buffer, minCycles, maxCycles)
 
 	fmt.Printf("If you go to sleep now at %s:\n", now.Format("15:04"))
-	for i, wakeTime := range wakeTimes {
+	fmt.Println("────────────────────────────────")
+	fmt.Printf("Assuming %d min to fall asleep\n\n", int(buffer.Minutes()))
+	for i := len(wakeTimes) - 1; i >= 0; i-- {
 		cycleCount := minCycles + i
-		fmt.Printf("  - For %d cycles, wake up at %s\n", cycleCount, wakeTime.Format("15:04"))
+		fmt.Printf("  - %d cycles, wake up at %s (%s)\n", cycleCount, wakeTimes[i].Format("15:04"), formatDuration(cycleCount))
 	}
 	return nil
 }
@@ -68,7 +70,10 @@ func runWindowMode(from, to string, buffer time.Duration) error {
 
 	cycles, remainder := cycle.CalculateCyclesInWindow(fromTime, toTime, buffer)
 	fmt.Printf("Between %s and %s:\n", from, to)
-	fmt.Printf("You can fit %d complete sleep cycles (%d minutes remaining)\n", cycles, int(remainder.Minutes()))
+	fmt.Println("───────────────────────")
+	fmt.Printf("Assuming %d min to fall asleep\n\n", int(buffer.Minutes()))
+	fmt.Printf("  - %d complete cycles (%s)\n", cycles, formatDuration(cycles))
+	fmt.Printf("  - %d minutes remaining\n", int(remainder.Minutes()))
 	return nil
 }
 
@@ -80,9 +85,11 @@ func runWakeMode(wake string, buffer time.Duration, minCycles, maxCycles int) er
 	bedtimes := cycle.CalculateBedtimes(wakeTime, buffer, minCycles, maxCycles)
 
 	fmt.Printf("To wake up at %s:\n", wake)
-	for i, bedtime := range bedtimes {
+	fmt.Println("───────────────────")
+	fmt.Printf("Assuming %d min to fall asleep\n\n", int(buffer.Minutes()))
+	for i := len(bedtimes) - 1; i >= 0; i-- {
 		cycleCount := minCycles + i
-		fmt.Printf("  - For %d cycles, go to sleep at %s\n", cycleCount, bedtime.Format("15:04"))
+		fmt.Printf("  - %d cycles, go to sleep at %s (%s)\n", cycleCount, bedtimes[i].Format("15:04"), formatDuration(cycleCount))
 	}
 	return nil
 }
@@ -95,9 +102,18 @@ func runSleepMode(sleep string, buffer time.Duration, minCycles, maxCycles int) 
 	wakeTimes := cycle.CalculateWakeTimes(sleepTime, buffer, minCycles, maxCycles)
 
 	fmt.Printf("If you go to sleep at %s:\n", sleep)
-	for i, wakeTime := range wakeTimes {
+	fmt.Println("────────────────────────────")
+	fmt.Printf("Assuming %d min to fall asleep\n\n", int(buffer.Minutes()))
+	for i := len(wakeTimes) - 1; i >= 0; i-- {
 		cycleCount := minCycles + i
-		fmt.Printf("  - For %d cycles, wake up at %s\n", cycleCount, wakeTime.Format("15:04"))
+		fmt.Printf("  - %d cycles, wake up at %s (%s)\n", cycleCount, wakeTimes[i].Format("15:04"), formatDuration(cycleCount))
 	}
 	return nil
+}
+
+func formatDuration(cycleCount int) string {
+	sleepDuration := time.Duration(cycleCount) * cycle.CycleDuration
+	hours := int(sleepDuration.Hours())
+	minutes := int(sleepDuration.Minutes()) % 60
+	return fmt.Sprintf("%dh %02dm", hours, minutes)
 }
