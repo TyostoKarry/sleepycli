@@ -2,7 +2,7 @@
 
 <p align="center">
     <img src="https://img.shields.io/badge/go-1.26.1-00ADD8?logo=go">
-    <img src="https://github.com/TyostoKarry/sleepycli/actions/workflows/verify-pr.yml/badge.svg?branch=main" />
+    <img src="https://github.com/TyostoKarry/sleepycli/actions/workflows/verify-pr.yml/badge.svg?event=pull_request" />
 </p>
 
 A small Go CLI for calculating sleep and wake times around 90-minute sleep cycles.
