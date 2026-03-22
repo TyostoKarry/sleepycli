@@ -12,6 +12,7 @@ const version = "0.1.0"
 
 func main() {
 	var (
+		nowFlag       bool
 		wakeFlag      string
 		sleepFlag     string
 		fromFlag      string
@@ -23,12 +24,13 @@ func main() {
 		versionFlag   bool
 	)
 
+	pflag.BoolVarP(&nowFlag, "now", "n", false, "Calculate wake times from current time")
 	pflag.StringVarP(&wakeFlag, "wake", "w", "", "Calculate bedtimes from wake time (HH:MM)")
 	pflag.StringVarP(&sleepFlag, "sleep", "s", "", "Calculate wake times from sleep time (HH:MM)")
 	pflag.StringVarP(&fromFlag, "from", "f", "", "Window sleep time (HH:MM), use with --to")
 	pflag.StringVarP(&toFlag, "to", "t", "", "Window wake time (HH:MM), use with --from")
 	pflag.IntVarP(&bufferFlag, "buffer", "b", 15, "Fall asleep buffer in minutes")
-	pflag.IntVarP(&cyclesMinFlag, "cycles-min", "n", 4, "Minimum cycles to show")
+	pflag.IntVarP(&cyclesMinFlag, "cycles-min", "m", 4, "Minimum cycles to show")
 	pflag.IntVarP(&cyclesMaxFlag, "cycles-max", "x", 6, "Maximum cycles to show")
 	pflag.BoolVarP(&goodNightFlag, "good-night", "", false, "Display a random good night art")
 	pflag.BoolVarP(&versionFlag, "version", "v", false, "Print version")
@@ -45,7 +47,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if err := validateAndSelectMode(wakeFlag, sleepFlag, fromFlag, toFlag, bufferFlag, cyclesMinFlag, cyclesMaxFlag); err != nil {
+	if err := validateAndSelectMode(nowFlag, wakeFlag, sleepFlag, fromFlag, toFlag, bufferFlag, cyclesMinFlag, cyclesMaxFlag); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}

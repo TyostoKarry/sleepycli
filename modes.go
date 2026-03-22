@@ -9,10 +9,12 @@ import (
 )
 
 func validateAndSelectMode(
+	nowFlag bool,
 	wakeFlag, sleepFlag, fromFlag, toFlag string,
 	bufferFlag, cyclesMinFlag, cyclesMaxFlag int,
 ) error {
 	cfg := validate.Config{
+		Now:       nowFlag,
 		WakeTime:  wakeFlag,
 		SleepTime: sleepFlag,
 		FromTime:  fromFlag,
@@ -27,6 +29,9 @@ func validateAndSelectMode(
 
 	buffer := time.Duration(bufferFlag) * time.Minute
 
+	if nowFlag {
+		return runNowMode(buffer, cyclesMinFlag, cyclesMaxFlag)
+	}
 	if fromFlag != "" && toFlag != "" {
 		return runWindowMode(fromFlag, toFlag, buffer)
 	}
@@ -37,6 +42,18 @@ func validateAndSelectMode(
 		return runSleepMode(sleepFlag, buffer, cyclesMinFlag, cyclesMaxFlag)
 	}
 	return fmt.Errorf("no valid mode selected")
+}
+
+func runNowMode(buffer time.Duration, minCycles, maxCycles int) error {
+	now := time.Now()
+	wakeTimes := cycle.CalculateWakeTimes(now, buffer, minCycles, maxCycles)
+
+	fmt.Printf("If you go to sleep now at %s:\n", now.Format("15:04"))
+	for i, wakeTime := range wakeTimes {
+		cycleCount := minCycles + i
+		fmt.Printf("  - For %d cycles, wake up at %s\n", cycleCount, wakeTime.Format("15:04"))
+	}
+	return nil
 }
 
 func runWindowMode(from, to string, buffer time.Duration) error {
