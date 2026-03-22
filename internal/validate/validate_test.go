@@ -2,6 +2,38 @@ package validate
 
 import "testing"
 
+func TestValidateModes(t *testing.T) {
+	tests := []struct {
+		name    string
+		now     bool
+		wake    string
+		sleep   string
+		from    string
+		to      string
+		wantErr bool
+	}{
+		{"now only", true, "", "", "", "", false},
+		{"wake only", false, "07:00", "", "", "", false},
+		{"sleep only", false, "", "22:00", "", "", false},
+		{"window only", false, "", "", "22:00", "07:00", false},
+		{"now with wake", true, "07:00", "", "", "", true},
+		{"now with sleep", true, "", "22:00", "", "", true},
+		{"now with window", true, "", "", "22:00", "07:00", true},
+		{"wake with window", false, "07:00", "", "22:00", "07:00", true},
+		{"sleep with window", false, "", "22:00", "22:00", "07:00", true},
+		{"no mode", false, "", "", "", "", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateModes(tt.now, tt.wake, tt.sleep, tt.from, tt.to)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("validateModes() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestValidateWakeTime(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -162,6 +194,7 @@ func TestValidateWindow(t *testing.T) {
 		{"invalid --to format", Config{FromTime: "22:00", ToTime: "7am"}, true},
 		{"window mixed with --wake", Config{FromTime: "22:00", ToTime: "07:00", WakeTime: "07:00"}, true},
 		{"window mixed with --sleep", Config{FromTime: "22:00", ToTime: "07:00", SleepTime: "22:00"}, true},
+		{"window mixed with --now", Config{FromTime: "22:00", ToTime: "07:00", Now: true}, true},
 	}
 
 	for _, tt := range tests {

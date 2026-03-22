@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	Now       bool
 	WakeTime  string
 	SleepTime string
 	FromTime  string
@@ -17,14 +18,14 @@ type Config struct {
 }
 
 func (c *Config) Validate() error {
-	if err := validateModes(c.WakeTime, c.SleepTime, c.FromTime, c.ToTime); err != nil {
+	if err := validateModes(c.Now, c.WakeTime, c.SleepTime, c.FromTime, c.ToTime); err != nil {
 		return err
 	}
 	if c.FromTime != "" || c.ToTime != "" {
 		if err := validateWindow(c.FromTime, c.ToTime); err != nil {
 			return err
 		}
-	} else {
+	} else if c.WakeTime != "" || c.SleepTime != "" {
 		if err := validateTimeFlags(c.WakeTime, c.SleepTime); err != nil {
 			return err
 		}
@@ -35,11 +36,22 @@ func (c *Config) Validate() error {
 	return validateCycles(c.MinCycles, c.MaxCycles)
 }
 
-func validateModes(wake, sleep, from, to string) error {
-	windowSet := from != "" || to != ""
-	wakeSleepSet := wake != "" || sleep != ""
-	if windowSet && wakeSleepSet {
-		return fmt.Errorf("cannot use --from/--to with --wake or --sleep")
+func validateModes(now bool, wake, sleep, from, to string) error {
+	modes := 0
+	if now {
+		modes++
+	}
+	if wake != "" || sleep != "" {
+		modes++
+	}
+	if from != "" || to != "" {
+		modes++
+	}
+	if modes > 1 {
+		return fmt.Errorf("cannot combine --now, --wake, --sleep, and --from/--to")
+	}
+	if modes == 0 {
+		return fmt.Errorf("must specify one of --now, --wake, --sleep, or --from/--to")
 	}
 	return nil
 }
