@@ -5,12 +5,15 @@ import (
 	"os"
 
 	"github.com/TyostoKarry/sleepycli/internal/goodnight"
+	"github.com/TyostoKarry/sleepycli/internal/help"
 	"github.com/spf13/pflag"
 )
 
 const version = "0.1.0"
 
 func main() {
+	help.SetupCustomHelp()
+
 	var (
 		nowFlag       bool
 		wakeFlag      string
@@ -32,7 +35,7 @@ func main() {
 	pflag.IntVarP(&bufferFlag, "buffer", "b", 15, "Fall asleep buffer in minutes")
 	pflag.IntVarP(&cyclesMinFlag, "cycles-min", "m", 4, "Minimum cycles to show")
 	pflag.IntVarP(&cyclesMaxFlag, "cycles-max", "x", 6, "Maximum cycles to show")
-	pflag.BoolVarP(&goodNightFlag, "good-night", "", false, "Display a random good night art")
+	pflag.BoolVarP(&goodNightFlag, "good-night", "g", false, "Display a random good night art")
 	pflag.BoolVarP(&versionFlag, "version", "v", false, "Print version")
 
 	pflag.Parse()
@@ -49,6 +52,7 @@ func main() {
 
 	if err := validateAndSelectMode(nowFlag, wakeFlag, sleepFlag, fromFlag, toFlag, bufferFlag, cyclesMinFlag, cyclesMaxFlag); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
+		fmt.Fprintln(os.Stderr, "Run 'sleepycli --help' for usage.")
 		os.Exit(1)
 	}
 }
