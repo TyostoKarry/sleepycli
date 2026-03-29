@@ -24,10 +24,10 @@ func WakeTimes(base time.Time, buffer time.Duration, minCycles, maxCycles int, h
 	sb.WriteString(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))) + "\n\n")
 	for i := len(wakeTimes) - 1; i >= 0; i-- {
 		c := minCycles + i
-		sb.WriteString(fmt.Sprintf("  %s cycles  →  wake at %s  %s\n",
+		fmt.Fprintf(&sb, "  %s cycles  →  wake at %s  %s\n",
 			styles.Result.Render(fmt.Sprintf("%d", c)),
 			styles.Result.Render(wakeTimes[i].Format("15:04")),
-			styles.Dim.Render("("+FormatDuration(c)+")")))
+			styles.Dim.Render("("+FormatDuration(c)+")"))
 	}
 	return sb.String()
 }
@@ -40,10 +40,10 @@ func Bedtimes(base time.Time, buffer time.Duration, minCycles, maxCycles int, he
 	sb.WriteString(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))) + "\n\n")
 	for i := len(bedTimes) - 1; i >= 0; i-- {
 		c := minCycles + i
-		sb.WriteString(fmt.Sprintf("  %s cycles  →  sleep at %s  %s\n",
+		fmt.Fprintf(&sb, "  %s cycles  →  sleep at %s  %s\n",
 			styles.Result.Render(fmt.Sprintf("%d", c)),
 			styles.Result.Render(bedTimes[i].Format("15:04")),
-			styles.Dim.Render("("+FormatDuration(c)+")")))
+			styles.Dim.Render("("+FormatDuration(c)+")"))
 	}
 	return sb.String()
 }
@@ -55,10 +55,10 @@ func Window(from, to string, fromTime, toTime time.Time, bufferMinutes int) stri
 	sb.WriteString(styles.Result.Render(fmt.Sprintf("Between %s and %s", from, to)) + "\n")
 	sb.WriteString(styles.Separator.Render(strings.Repeat("─", 30)) + "\n")
 	sb.WriteString(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", bufferMinutes)) + "\n\n")
-	sb.WriteString(fmt.Sprintf("  %s complete cycles  %s\n",
+	fmt.Fprintf(&sb, "  %s complete cycles  %s\n",
 		styles.Result.Render(fmt.Sprintf("%d", cycles)),
-		styles.Dim.Render("("+FormatDuration(cycles)+")")))
-	sb.WriteString(fmt.Sprintf("  %s minutes remaining\n",
-		styles.Result.Render(fmt.Sprintf("%d", int(remainder.Minutes())))))
+		styles.Dim.Render("("+FormatDuration(cycles)+")"))
+	fmt.Fprintf(&sb, "  %s minutes remaining\n",
+		styles.Result.Render(fmt.Sprintf("%d", int(remainder.Minutes()))))
 	return sb.String()
 }
