@@ -32,6 +32,7 @@ func writeHelp(w io.Writer, name string) error {
 
 	fmt.Fprintf(&b, "%s — sleep cycle calculator\n\n", name)
 	b.WriteString("Usage:\n")
+	fmt.Fprintf(&b, "  %s                    Launch interactive mode\n", name)
 	fmt.Fprintf(&b, "  %s [mode] [options]\n\n", name)
 
 	b.WriteString("Choose exactly one mode:\n")
