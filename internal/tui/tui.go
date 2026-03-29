@@ -8,6 +8,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/TyostoKarry/sleepycli/internal/cycle"
+	"github.com/TyostoKarry/sleepycli/internal/styles"
 	"github.com/TyostoKarry/sleepycli/internal/validate"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -15,11 +16,11 @@ import (
 var (
 	titleStyle         = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("75"))
 	selectedStyle      = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("212"))
-	dimStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	errorStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("196"))
-	resultStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("120"))
+	dimStyle           = styles.Dim
+	errorStyle         = styles.Error
+	resultStyle        = styles.Result
 	labelStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
-	separatorStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	separatorStyle     = styles.Separator
 	sectionHeaderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("67"))
 	cursorStyle        = lipgloss.NewStyle().Reverse(true)
 	inputStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))

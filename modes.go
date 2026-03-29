@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/TyostoKarry/sleepycli/internal/cycle"
+	"github.com/TyostoKarry/sleepycli/internal/styles"
 	"github.com/TyostoKarry/sleepycli/internal/validate"
 )
 
@@ -48,12 +50,16 @@ func runNowMode(buffer time.Duration, minCycles, maxCycles int) error {
 	now := time.Now()
 	wakeTimes := cycle.CalculateWakeTimes(now, buffer, minCycles, maxCycles)
 
-	fmt.Printf("If you go to sleep now at %s:\n", now.Format("15:04"))
-	fmt.Println("────────────────────────────────")
-	fmt.Printf("Assuming %d min to fall asleep\n\n", int(buffer.Minutes()))
+	fmt.Println(styles.Result.Render(fmt.Sprintf("Sleeping now at %s", now.Format("15:04"))))
+	fmt.Println(styles.Separator.Render(strings.Repeat("─", 30)))
+	fmt.Println(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))))
+	fmt.Println()
 	for i := len(wakeTimes) - 1; i >= 0; i-- {
 		cycleCount := minCycles + i
-		fmt.Printf("  - %d cycles, wake up at %s (%s)\n", cycleCount, wakeTimes[i].Format("15:04"), formatDuration(cycleCount))
+		fmt.Printf("  %s cycles  →  wake at %s  %s\n",
+			styles.Result.Render(fmt.Sprintf("%d", cycleCount)),
+			styles.Result.Render(wakeTimes[i].Format("15:04")),
+			styles.Dim.Render("("+formatDuration(cycleCount)+")"))
 	}
 	return nil
 }
@@ -69,11 +75,15 @@ func runWindowMode(from, to string, buffer time.Duration) error {
 	}
 
 	cycles, remainder := cycle.CalculateCyclesInWindow(fromTime, toTime, buffer)
-	fmt.Printf("Between %s and %s:\n", from, to)
-	fmt.Println("───────────────────────")
-	fmt.Printf("Assuming %d min to fall asleep\n\n", int(buffer.Minutes()))
-	fmt.Printf("  - %d complete cycles (%s)\n", cycles, formatDuration(cycles))
-	fmt.Printf("  - %d minutes remaining\n", int(remainder.Minutes()))
+	fmt.Println(styles.Result.Render(fmt.Sprintf("Between %s and %s", from, to)))
+	fmt.Println(styles.Separator.Render(strings.Repeat("─", 30)))
+	fmt.Println(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))))
+	fmt.Println()
+	fmt.Printf("  %s complete cycles  %s\n",
+		styles.Result.Render(fmt.Sprintf("%d", cycles)),
+		styles.Dim.Render("("+formatDuration(cycles)+")"))
+	fmt.Printf("  %s minutes remaining\n",
+		styles.Result.Render(fmt.Sprintf("%d", int(remainder.Minutes()))))
 	return nil
 }
 
@@ -84,12 +94,16 @@ func runWakeMode(wake string, buffer time.Duration, minCycles, maxCycles int) er
 	}
 	bedtimes := cycle.CalculateBedtimes(wakeTime, buffer, minCycles, maxCycles)
 
-	fmt.Printf("To wake up at %s:\n", wake)
-	fmt.Println("───────────────────")
-	fmt.Printf("Assuming %d min to fall asleep\n\n", int(buffer.Minutes()))
+	fmt.Println(styles.Result.Render(fmt.Sprintf("To wake up at %s", wake)))
+	fmt.Println(styles.Separator.Render(strings.Repeat("─", 30)))
+	fmt.Println(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))))
+	fmt.Println()
 	for i := len(bedtimes) - 1; i >= 0; i-- {
 		cycleCount := minCycles + i
-		fmt.Printf("  - %d cycles, go to sleep at %s (%s)\n", cycleCount, bedtimes[i].Format("15:04"), formatDuration(cycleCount))
+		fmt.Printf("  %s cycles  →  sleep at %s  %s\n",
+			styles.Result.Render(fmt.Sprintf("%d", cycleCount)),
+			styles.Result.Render(bedtimes[i].Format("15:04")),
+			styles.Dim.Render("("+formatDuration(cycleCount)+")"))
 	}
 	return nil
 }
@@ -101,12 +115,16 @@ func runSleepMode(sleep string, buffer time.Duration, minCycles, maxCycles int) 
 	}
 	wakeTimes := cycle.CalculateWakeTimes(sleepTime, buffer, minCycles, maxCycles)
 
-	fmt.Printf("If you go to sleep at %s:\n", sleep)
-	fmt.Println("────────────────────────────")
-	fmt.Printf("Assuming %d min to fall asleep\n\n", int(buffer.Minutes()))
+	fmt.Println(styles.Result.Render(fmt.Sprintf("Sleeping at %s", sleep)))
+	fmt.Println(styles.Separator.Render(strings.Repeat("─", 30)))
+	fmt.Println(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))))
+	fmt.Println()
 	for i := len(wakeTimes) - 1; i >= 0; i-- {
 		cycleCount := minCycles + i
-		fmt.Printf("  - %d cycles, wake up at %s (%s)\n", cycleCount, wakeTimes[i].Format("15:04"), formatDuration(cycleCount))
+		fmt.Printf("  %s cycles  →  wake at %s  %s\n",
+			styles.Result.Render(fmt.Sprintf("%d", cycleCount)),
+			styles.Result.Render(wakeTimes[i].Format("15:04")),
+			styles.Dim.Render("("+formatDuration(cycleCount)+")"))
 	}
 	return nil
 }
