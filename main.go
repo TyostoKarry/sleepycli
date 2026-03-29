@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	tea "charm.land/bubbletea/v2"
 	"github.com/TyostoKarry/sleepycli/internal/goodnight"
 	"github.com/TyostoKarry/sleepycli/internal/help"
+	"github.com/TyostoKarry/sleepycli/internal/tui"
 	"github.com/spf13/pflag"
 )
 
-const version = "0.1.0"
+const version = "0.2.0"
 
 func main() {
 	help.SetupCustomHelp()
@@ -40,6 +42,19 @@ func main() {
 
 	pflag.Parse()
 
+	if !anyFlagSet() {
+		p := tea.NewProgram(tui.InitialModel())
+		m, err := p.Run()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error running TUI:", err)
+			os.Exit(1)
+		}
+		if model, ok := m.(tui.Model); ok && model.PrintResult != "" {
+			fmt.Println(model.PrintResult)
+		}
+		return
+	}
+
 	if versionFlag {
 		fmt.Println("sleepycli v" + version)
 		os.Exit(0)
@@ -55,4 +70,12 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Run 'sleepycli --help' for usage.")
 		os.Exit(1)
 	}
+}
+
+func anyFlagSet() bool {
+	found := false
+	pflag.Visit(func(f *pflag.Flag) {
+		found = true
+	})
+	return found
 }
