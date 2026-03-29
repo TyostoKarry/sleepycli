@@ -7,7 +7,7 @@ import (
 	"unicode"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/TyostoKarry/sleepycli/internal/cycle"
+	"github.com/TyostoKarry/sleepycli/internal/render"
 	"github.com/TyostoKarry/sleepycli/internal/styles"
 	"github.com/TyostoKarry/sleepycli/internal/validate"
 	"github.com/charmbracelet/lipgloss"
@@ -18,9 +18,7 @@ var (
 	selectedStyle      = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("212"))
 	dimStyle           = styles.Dim
 	errorStyle         = styles.Error
-	resultStyle        = styles.Result
 	labelStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
-	separatorStyle     = styles.Separator
 	sectionHeaderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("67"))
 	cursorStyle        = lipgloss.NewStyle().Reverse(true)
 	inputStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
@@ -291,8 +289,9 @@ func (m Model) computeResult() string {
 
 	switch m.selectedMode {
 	case rowNow:
-		return m.renderWakeTimes(time.Now(), buffer, minCycles, maxCycles,
-			fmt.Sprintf("Sleeping now at %s", time.Now().Format("15:04")))
+		now := time.Now()
+		return render.WakeTimes(now, buffer, minCycles, maxCycles,
+			fmt.Sprintf("Sleeping now at %s", now.Format("15:04")))
 
 	case rowWake:
 		raw := m.inputPrimary.value
@@ -303,7 +302,7 @@ func (m Model) computeResult() string {
 		if err != nil {
 			return errorStyle.Render("Invalid time, use HH:MM")
 		}
-		return m.renderBedtimes(wakeTime, buffer, minCycles, maxCycles,
+		return render.Bedtimes(wakeTime, buffer, minCycles, maxCycles,
 			fmt.Sprintf("To wake up at %s", raw))
 
 	case rowSleep:
@@ -315,7 +314,7 @@ func (m Model) computeResult() string {
 		if err != nil {
 			return errorStyle.Render("Invalid time, use HH:MM")
 		}
-		return m.renderWakeTimes(sleepTime, buffer, minCycles, maxCycles,
+		return render.WakeTimes(sleepTime, buffer, minCycles, maxCycles,
 			fmt.Sprintf("Sleeping at %s", raw))
 
 	case rowWindow:
@@ -332,58 +331,9 @@ func (m Model) computeResult() string {
 		if err != nil {
 			return errorStyle.Render("to: Invalid time, use HH:MM")
 		}
-		cycles, remainder := cycle.CalculateCyclesInWindow(fromTime, toTime, buffer)
-		var sb strings.Builder
-		sb.WriteString(resultStyle.Render(fmt.Sprintf("Between %s and %s", rawFrom, rawTo)) + "\n")
-		sb.WriteString(separatorStyle.Render(strings.Repeat("─", 30)) + "\n")
-		sb.WriteString(dimStyle.Render(fmt.Sprintf("Assuming %d min to fall asleep", m.bufferMinutes())) + "\n\n")
-		sb.WriteString(fmt.Sprintf("  %s complete cycles  %s\n",
-			resultStyle.Render(fmt.Sprintf("%d", cycles)),
-			dimStyle.Render("("+formatDuration(cycles)+")")))
-		sb.WriteString(fmt.Sprintf("  %s minutes remaining\n",
-			resultStyle.Render(fmt.Sprintf("%d", int(remainder.Minutes())))))
-		return sb.String()
+		return render.Window(rawFrom, rawTo, fromTime, toTime, m.bufferMinutes())
 	}
 	return ""
-}
-
-func (m Model) renderWakeTimes(base time.Time, buffer time.Duration, minCycles, maxCycles int, header string) string {
-	wakeTimes := cycle.CalculateWakeTimes(base, buffer, minCycles, maxCycles)
-	var sb strings.Builder
-	sb.WriteString(resultStyle.Render(header) + "\n")
-	sb.WriteString(separatorStyle.Render(strings.Repeat("─", 30)) + "\n")
-	sb.WriteString(dimStyle.Render(fmt.Sprintf("Assuming %d min to fall asleep", m.bufferMinutes())) + "\n\n")
-	for i := len(wakeTimes) - 1; i >= 0; i-- {
-		c := minCycles + i
-		sb.WriteString(fmt.Sprintf("  %s cycles  →  wake at %s  %s\n",
-			resultStyle.Render(fmt.Sprintf("%d", c)),
-			resultStyle.Render(wakeTimes[i].Format("15:04")),
-			dimStyle.Render("("+formatDuration(c)+")")))
-	}
-	return sb.String()
-}
-
-func (m Model) renderBedtimes(base time.Time, buffer time.Duration, minCycles, maxCycles int, header string) string {
-	bedTimes := cycle.CalculateBedtimes(base, buffer, minCycles, maxCycles)
-	var sb strings.Builder
-	sb.WriteString(resultStyle.Render(header) + "\n")
-	sb.WriteString(separatorStyle.Render(strings.Repeat("─", 30)) + "\n")
-	sb.WriteString(dimStyle.Render(fmt.Sprintf("Assuming %d min to fall asleep", m.bufferMinutes())) + "\n\n")
-	for i := len(bedTimes) - 1; i >= 0; i-- {
-		c := minCycles + i
-		sb.WriteString(fmt.Sprintf("  %s cycles  →  sleep at %s  %s\n",
-			resultStyle.Render(fmt.Sprintf("%d", c)),
-			resultStyle.Render(bedTimes[i].Format("15:04")),
-			dimStyle.Render("("+formatDuration(c)+")")))
-	}
-	return sb.String()
-}
-
-func formatDuration(cycleCount int) string {
-	duration := time.Duration(cycleCount) * cycle.CycleDuration
-	hours := int(duration.Hours())
-	minutes := int(duration.Minutes()) % 60
-	return fmt.Sprintf("%dh %02dm", hours, minutes)
 }
 
 func (m Model) View() tea.View {

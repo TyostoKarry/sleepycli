@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
-	"github.com/TyostoKarry/sleepycli/internal/cycle"
-	"github.com/TyostoKarry/sleepycli/internal/styles"
+	"github.com/TyostoKarry/sleepycli/internal/render"
 	"github.com/TyostoKarry/sleepycli/internal/validate"
 )
 
@@ -48,19 +46,8 @@ func validateAndSelectMode(
 
 func runNowMode(buffer time.Duration, minCycles, maxCycles int) error {
 	now := time.Now()
-	wakeTimes := cycle.CalculateWakeTimes(now, buffer, minCycles, maxCycles)
-
-	fmt.Println(styles.Result.Render(fmt.Sprintf("Sleeping now at %s", now.Format("15:04"))))
-	fmt.Println(styles.Separator.Render(strings.Repeat("─", 30)))
-	fmt.Println(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))))
-	fmt.Println()
-	for i := len(wakeTimes) - 1; i >= 0; i-- {
-		cycleCount := minCycles + i
-		fmt.Printf("  %s cycles  →  wake at %s  %s\n",
-			styles.Result.Render(fmt.Sprintf("%d", cycleCount)),
-			styles.Result.Render(wakeTimes[i].Format("15:04")),
-			styles.Dim.Render("("+formatDuration(cycleCount)+")"))
-	}
+	fmt.Print(render.WakeTimes(now, buffer, minCycles, maxCycles,
+		fmt.Sprintf("Sleeping now at %s", now.Format("15:04"))))
 	return nil
 }
 
@@ -74,16 +61,7 @@ func runWindowMode(from, to string, buffer time.Duration) error {
 		return err
 	}
 
-	cycles, remainder := cycle.CalculateCyclesInWindow(fromTime, toTime, buffer)
-	fmt.Println(styles.Result.Render(fmt.Sprintf("Between %s and %s", from, to)))
-	fmt.Println(styles.Separator.Render(strings.Repeat("─", 30)))
-	fmt.Println(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))))
-	fmt.Println()
-	fmt.Printf("  %s complete cycles  %s\n",
-		styles.Result.Render(fmt.Sprintf("%d", cycles)),
-		styles.Dim.Render("("+formatDuration(cycles)+")"))
-	fmt.Printf("  %s minutes remaining\n",
-		styles.Result.Render(fmt.Sprintf("%d", int(remainder.Minutes()))))
+	fmt.Print(render.Window(from, to, fromTime, toTime, int(buffer.Minutes())))
 	return nil
 }
 
@@ -92,19 +70,8 @@ func runWakeMode(wake string, buffer time.Duration, minCycles, maxCycles int) er
 	if err != nil {
 		return err
 	}
-	bedtimes := cycle.CalculateBedtimes(wakeTime, buffer, minCycles, maxCycles)
-
-	fmt.Println(styles.Result.Render(fmt.Sprintf("To wake up at %s", wake)))
-	fmt.Println(styles.Separator.Render(strings.Repeat("─", 30)))
-	fmt.Println(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))))
-	fmt.Println()
-	for i := len(bedtimes) - 1; i >= 0; i-- {
-		cycleCount := minCycles + i
-		fmt.Printf("  %s cycles  →  sleep at %s  %s\n",
-			styles.Result.Render(fmt.Sprintf("%d", cycleCount)),
-			styles.Result.Render(bedtimes[i].Format("15:04")),
-			styles.Dim.Render("("+formatDuration(cycleCount)+")"))
-	}
+	fmt.Print(render.Bedtimes(wakeTime, buffer, minCycles, maxCycles,
+		fmt.Sprintf("To wake up at %s", wake)))
 	return nil
 }
 
@@ -113,25 +80,7 @@ func runSleepMode(sleep string, buffer time.Duration, minCycles, maxCycles int) 
 	if err != nil {
 		return err
 	}
-	wakeTimes := cycle.CalculateWakeTimes(sleepTime, buffer, minCycles, maxCycles)
-
-	fmt.Println(styles.Result.Render(fmt.Sprintf("Sleeping at %s", sleep)))
-	fmt.Println(styles.Separator.Render(strings.Repeat("─", 30)))
-	fmt.Println(styles.Dim.Render(fmt.Sprintf("Assuming %d min to fall asleep", int(buffer.Minutes()))))
-	fmt.Println()
-	for i := len(wakeTimes) - 1; i >= 0; i-- {
-		cycleCount := minCycles + i
-		fmt.Printf("  %s cycles  →  wake at %s  %s\n",
-			styles.Result.Render(fmt.Sprintf("%d", cycleCount)),
-			styles.Result.Render(wakeTimes[i].Format("15:04")),
-			styles.Dim.Render("("+formatDuration(cycleCount)+")"))
-	}
+	fmt.Print(render.WakeTimes(sleepTime, buffer, minCycles, maxCycles,
+		fmt.Sprintf("Sleeping at %s", sleep)))
 	return nil
-}
-
-func formatDuration(cycleCount int) string {
-	sleepDuration := time.Duration(cycleCount) * cycle.CycleDuration
-	hours := int(sleepDuration.Hours())
-	minutes := int(sleepDuration.Minutes()) % 60
-	return fmt.Sprintf("%dh %02dm", hours, minutes)
 }
