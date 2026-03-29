@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-const version = "1.0.0"
+var version = "dev"
 
 func main() {
 	help.SetupCustomHelp()

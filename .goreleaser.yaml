@@ -1,0 +1,38 @@
+version: 2
+
+project_name: sleepycli
+
+before:
+  hooks:
+    - go mod download
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+extra_files:
+  - glob: scripts/sleepycli-completion.bash
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  draft: false
