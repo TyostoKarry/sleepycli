@@ -28,11 +28,10 @@ archives:
         formats:
           - zip
 
-extra_files:
-  - glob: scripts/sleepycli-completion.bash
-
 checksum:
   name_template: "checksums.txt"
 
 release:
   draft: false
+  extra_files:
+    - glob: scripts/sleepycli-completion.bash
