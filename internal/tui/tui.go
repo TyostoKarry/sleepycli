@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -252,30 +253,24 @@ func activeSettingsInput(m *Model) *textInput {
 }
 
 func (m Model) bufferMinutes() int {
-	if m.inputBuffer.value == "" {
-		return 15
+	if n, err := strconv.Atoi(m.inputBuffer.value); err == nil {
+		return n
 	}
-	var n int
-	fmt.Sscanf(m.inputBuffer.value, "%d", &n)
-	return n
+	return 15 // default buffer
 }
 
 func (m Model) cyclesMin() int {
-	if m.inputCyclesMin.value == "" {
-		return 4
+	if n, err := strconv.Atoi(m.inputCyclesMin.value); err == nil {
+		return n
 	}
-	var n int
-	fmt.Sscanf(m.inputCyclesMin.value, "%d", &n)
-	return n
+	return 4 // default min cycles
 }
 
 func (m Model) cyclesMax() int {
-	if m.inputCyclesMax.value == "" {
-		return 6
+	if n, err := strconv.Atoi(m.inputCyclesMax.value); err == nil {
+		return n
 	}
-	var n int
-	fmt.Sscanf(m.inputCyclesMax.value, "%d", &n)
-	return n
+	return 6 // default max cycles
 }
 
 func (m Model) computeResult() string {
