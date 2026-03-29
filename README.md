@@ -16,6 +16,7 @@ The tool supports four main modes: calculate from **now**, from a target **wake*
 
 ## Features
 
+- Interactive TUI mode when run without flags
 - Calculate wake times from the current time
 - Calculate bedtimes for a target wake time
 - Calculate wake times for a target sleep time
@@ -52,7 +53,21 @@ go build -o sleepycli .
 go run . --help
 ```
 
-## Usage
+## Interactive mode
+
+Run `sleepycli` without any flags to launch the interactive TUI:
+
+```bash
+sleepycli
+```
+
+- Navigate with `↑` / `↓`
+- Press `enter` on a mode to select it and type your time
+- Adjust settings (buffer, cycle range) from the settings section
+- Press `enter` to confirm — the result is printed to your terminal
+- Press `q` to quit without output
+
+## CLI flags
 
 ```bash
 sleepycli [mode] [options]
@@ -109,27 +124,27 @@ sleepycli --sleep 23:00 --cycles-min 3 --cycles-max 7
 #### `--wake 07:00`
 
 ```text
-To wake up at 07:00:
-───────────────────
+To wake up at 07:00
+──────────────────────────────
 Assuming 15 min to fall asleep
 
-  - 6 cycles, go to sleep at 21:45 (9h 00m)
-  - 5 cycles, go to sleep at 23:15 (7h 30m)
-  - 4 cycles, go to sleep at 00:45 (6h 00m)
+  6 cycles  →  sleep at 21:45  (9h 00m)
+  5 cycles  →  sleep at 23:15  (7h 30m)
+  4 cycles  →  sleep at 00:45  (6h 00m)
 ```
 
 #### `--from 22:00 --to 07:00`
 
 ```text
-Between 22:00 and 07:00:
-───────────────────────
+Between 22:00 and 07:00
+──────────────────────────────
 Assuming 15 min to fall asleep
 
-  - 5 complete cycles (7h 30m)
-  - 75 minutes remaining
+  5 complete cycles  (7h 30m)
+  75 minutes remaining
 ```
 
-## Flags
+## Flag reference
 
 | Flag | Description | Default |
 |---|---|---:|
