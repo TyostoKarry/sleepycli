@@ -39,18 +39,42 @@ Defaults:
 
 ## Installation
 
+### Download binary
+
+Download the latest binary and completion script from the [releases page](https://github.com/TyostoKarry/sleepycli/releases/latest).
+
+#### Linux / macOS
+
+```bash
+tar -xzf sleepycli_<version>_<os>_<arch>.tar.gz
+chmod +x sleepycli
+sudo mv sleepycli /usr/local/bin/sleepycli
+```
+
+To enable bash completion, add this to your `~/.bashrc`:
+
+```bash
+source <(curl -sL https://github.com/TyostoKarry/sleepycli/releases/latest/download/sleepycli-completion.bash)
+```
+
+#### Windows
+
+Extract the `.zip` archive and move `sleepycli.exe` to a folder in your `PATH`.
+
+### go install
+
+If you have Go installed:
+
+```bash
+go install github.com/TyostoKarry/sleepycli@latest
+```
+
 ### Build from source
 
 ```bash
 git clone https://github.com/TyostoKarry/sleepycli.git
 cd sleepycli
 go build -o sleepycli .
-```
-
-### Run without installing
-
-```bash
-go run . --help
 ```
 
 ## Interactive mode
@@ -170,21 +194,6 @@ Assuming 15 min to fall asleep
 - `--cycles-min` cannot be greater than `--cycles-max`
 - Buffer and cycle values cannot be negative
 
-## Bash completion
-
-A completion script is included at:
-
-```bash
-scripts/sleepycli-completion.bash
-```
-
-To load it in your current shell:
-
-```bash
-source scripts/sleepycli-completion.bash
-```
-
-To make it persistent, add that line to your shell profile.
 
 ## CI
 
